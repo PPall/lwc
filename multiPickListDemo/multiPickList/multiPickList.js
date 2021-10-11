@@ -49,8 +49,8 @@ export default class MultiPickList extends LightningElement {
                 return;
             }
         });
-        this.setPickListName ();
-        this.onItemSelected ();
+        self.setPickListName ();
+        self.onItemSelected ();
     }
     filterDropDownValues (event) {
         this._filterValue = event.target.value;
