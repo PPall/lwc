@@ -2,7 +2,7 @@ import {LightningElement, api, track} from 'lwc';
 export default class MultiPickList extends LightningElement {
 
     @api label  = ''; //Name of the dropDown
-    @api maxselected  = 2; //Max selected item display
+    @api maxselected  = 3; //Max selected item display
     @api options; // List of items to display
     @api showfilterinput = false; //show filterbutton
     @api showrefreshbutton = false; //show the refresh button
@@ -13,7 +13,6 @@ export default class MultiPickList extends LightningElement {
     @track _selectedItems = 'Select a value';
     @track _filterValue;
     @track _mOptions;
-
     constructor () {
         super();
         this._filterValue = '';
@@ -42,7 +41,9 @@ export default class MultiPickList extends LightningElement {
         }
     }
     handleItemSelected (event) {
+        //console.log(this);
         let self = this;
+        //console.log(self);
         this._mOptions.forEach (function (eachItem) {
             if (eachItem.key == event.detail.item.key) {
                 eachItem.selected = event.detail.selected;
@@ -61,7 +62,6 @@ export default class MultiPickList extends LightningElement {
              node.classList.remove('slds-is-open');
         });
     }
-
     onDropDownClick (dropDownDiv) {
         let classList = Array.from (this.template.querySelectorAll ('.ms-picklist-dropdown'));
         if(!classList.includes("slds-is-open")){
@@ -79,6 +79,23 @@ export default class MultiPickList extends LightningElement {
         this.updateListItems ('');
         this.onItemSelected ();
     }
+    @api
+    parentRefreshClick (options) {
+        let that = this;
+        console.log('parentRefresh');
+        this._filterValue = '';
+        that._mOptions = new Array (); 
+        if (options.length > 0) {
+            options.forEach (function (eachItem) {
+                that._mOptions.push (JSON.parse (JSON.stringify(eachItem)));
+                console.log('itens no contexto:');
+                console.log(JSON.parse (JSON.stringify(eachItem)));
+            });
+        }
+        this.updateListItems ('');
+        this.onItemSelected (); 
+      
+    }
     onClearClick (event) {
         this._filterValue = '';
         this.updateListItems ('');
@@ -87,16 +104,22 @@ export default class MultiPickList extends LightningElement {
         this.initArray (this);
     }
     initArray (context) {
+        let self = this;
+        console.log('initArray');
+        console.log(JSON.parse (JSON.stringify(self.options)));
+        console.log(JSON.parse (JSON.stringify(this.options)));
         context._mOptions = new Array ();  
         context.options.forEach (function (eachItem) {
             context._mOptions.push (JSON.parse (JSON.stringify(eachItem)));
+            console.log('itens no contexto:');
+            console.log(JSON.parse (JSON.stringify(eachItem)));
         });
     }
     updateListItems (inputText) {
         Array.from (this.template.querySelectorAll('c-pick-list-item')).forEach (function (node) {
             if(!inputText){
                 node.style.display = "block";
-            } else if(node.item.value.toString().toLowerCase().indexOf(inputText.toString().trim().toLowerCase()) != -1){
+            } else if(node.item.label.toString().toLowerCase().indexOf(inputText.toString().trim().toLowerCase()) != -1){
                 node.style.display = "block";
             } else{
                 node.style.display = "none";
@@ -110,7 +133,7 @@ export default class MultiPickList extends LightningElement {
         if (selecedItems.length < 1) {
             selections = this.comboplaceholder;
         } else if (selecedItems.length > this.maxselected) {
-            selections = selecedItems.length + ' Options Selected';
+            selections = selecedItems.length + ' Opções selecionadas';
         } else {
             selecedItems.forEach (option => {
                 selections += option.value+',';
@@ -128,7 +151,6 @@ export default class MultiPickList extends LightningElement {
         });
         return resArray;
     }
-
     onItemSelected () {
         const evt = new CustomEvent ('itemselected', { detail : this.getSelectedItems ()});
         this.dispatchEvent (evt);
